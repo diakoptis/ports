@@ -10,6 +10,7 @@ class PortSyncService
     public function __construct(
         protected Risk4SeaClient $risk4SeaClient,
         protected PortRepository $portRepository,
+        protected PortListingService $portListingService,
     ) {}
 
     /**
@@ -55,6 +56,7 @@ class PortSyncService
         $updatedCount = $preparedPorts->count() - $newCount;
 
         $this->portRepository->upsert($preparedPorts->values(), now());
+        $this->portListingService->forgetCountriesCache();
 
         return [
             'fetched' => $ports->count(),

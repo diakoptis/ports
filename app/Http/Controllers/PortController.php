@@ -2,34 +2,28 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Port;
+use App\Services\PortListingService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
 class PortController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request, PortListingService $portListingService): View
     {
         $search = trim((string) $request->query('search'));
         $unlocode = strtoupper(trim((string) $request->query('unlocode')));
         $countryCode = (string) $request->query('country_code');
+        $page = max(1, (int) $request->integer('page', 1));
 
-        $ports = Port::query()
-            ->selectListColumns()
-            ->searchByName($search)
-            ->filterByUnlocode($unlocode)
-            ->filterByCountryCode($countryCode)
-            ->orderForListing()
-            ->paginate(100)
+        $ports = $portListingService
+            ->list([
+                'search' => $search,
+                'unlocode' => $unlocode,
+                'country_code' => $countryCode,
+            ], 100, $page)
             ->withQueryString();
 
-        $countries = Port::query()
-            ->select(['country_code', 'country_name'])
-            ->whereNotNull('country_code')
-            ->where('country_code', '!=', '')
-            ->groupBy(['country_code', 'country_name'])
-            ->orderBy('country_name')
-            ->get();
+        $countries = $portListingService->countries();
 
         return view('ports.index', [
             'countries' => $countries,

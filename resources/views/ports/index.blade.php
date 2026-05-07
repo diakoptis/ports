@@ -35,8 +35,8 @@
                         <select id="country_code" name="country_code" class="form-select">
                             <option value="">All countries</option>
                             @foreach ($countries as $country)
-                                <option value="{{ $country->country_code }}" @selected($filters['country_code'] === $country->country_code)>
-                                    {{ $country->country_name }} ({{ $country->country_code }})
+                                <option value="{{ $country['country_code'] }}" @selected($filters['country_code'] === $country['country_code'])>
+                                    {{ $country['country_name'] }} ({{ $country['country_code'] }})
                                 </option>
                             @endforeach
                         </select>
