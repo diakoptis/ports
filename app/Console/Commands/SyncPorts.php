@@ -40,8 +40,16 @@ class SyncPorts extends Command
             return self::FAILURE;
         }
 
-        $preparedPorts = $this->preparePortsForUpsert($ports);
-        $skippedCount = $ports->count() - $preparedPorts->count();
+        $invalidPorts = $ports
+            ->filter(fn (array $port): bool => $port['unlocode'] === '' || $port['name'] === '');
+
+        $validPorts = $ports
+            ->reject(fn (array $port): bool => $port['unlocode'] === '' || $port['name'] === '');
+
+        $preparedPorts = $this->preparePortsForUpsert($validPorts);
+        $invalidCount = $invalidPorts->count();
+        $duplicateInPayloadCount = $validPorts->count() - $preparedPorts->count();
+        $skippedCount = $invalidCount + $duplicateInPayloadCount;
 
         if ($preparedPorts->isEmpty()) {
             $this->warn('No valid ports were returned by the API.');
@@ -49,6 +57,8 @@ class SyncPorts extends Command
             Log::warning('Risk4Sea port sync finished with no valid records.', [
                 'search' => $search,
                 'fetched' => $ports->count(),
+                'invalid' => $invalidCount,
+                'duplicate_in_payload' => $duplicateInPayloadCount,
                 'skipped' => $skippedCount,
             ]);
 
@@ -74,6 +84,8 @@ class SyncPorts extends Command
             'synced' => $preparedPorts->count(),
             'new' => $newCount,
             'updated' => $updatedCount,
+            'invalid' => $invalidCount,
+            'duplicate_in_payload' => $duplicateInPayloadCount,
             'skipped' => $skippedCount,
         ]);
 
@@ -86,7 +98,9 @@ class SyncPorts extends Command
                 ['Synced', $preparedPorts->count()],
                 ['New', $newCount],
                 ['Updated', $updatedCount],
-                ['Skipped', $skippedCount],
+                ['Invalid', $invalidCount],
+                ['Duplicate in payload', $duplicateInPayloadCount],
+                ['Total skipped', $skippedCount],
             ],
         );
 
@@ -113,7 +127,6 @@ class SyncPorts extends Command
         $timestamp = now();
 
         return $ports
-            ->filter(fn (array $port): bool => $port['unlocode'] !== '' && $port['name'] !== '')
             ->map(fn (array $port): array => [
                 ...$port,
                 'updated_at' => $timestamp,
