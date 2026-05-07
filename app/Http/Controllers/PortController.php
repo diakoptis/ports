@@ -15,13 +15,11 @@ class PortController extends Controller
         $countryCode = (string) $request->query('country_code');
 
         $ports = Port::query()
-            ->select(['id', 'unlocode', 'name', 'country_name', 'country_code', 'updated_at'])
-            ->when($request->filled('search'), function ($query) use ($search): void {
-                $query->where('name', 'like', "%{$search}%");
-            })
-            ->when($request->filled('unlocode'), fn($query): mixed => $query->where('unlocode', $unlocode))
-            ->when($request->filled('country_code'), fn($query): mixed => $query->where('country_code', $countryCode))
-            ->orderBy('name')
+            ->selectListColumns()
+            ->searchByName($search)
+            ->filterByUnlocode($unlocode)
+            ->filterByCountryCode($countryCode)
+            ->orderForListing()
             ->paginate(100)
             ->withQueryString();
 
@@ -32,9 +30,6 @@ class PortController extends Controller
             ->groupBy(['country_code', 'country_name'])
             ->orderBy('country_name')
             ->get();
-
-
-
 
         return view('ports.index', [
             'countries' => $countries,
