@@ -41,6 +41,8 @@ return [
         'token' => env('RISK4SEA_TOKEN'),
         'timeout' => (int) env('RISK4SEA_TIMEOUT', 15),
         'connect_timeout' => (int) env('RISK4SEA_CONNECT_TIMEOUT', 5),
+        'retry_times' => (int) env('RISK4SEA_RETRY_TIMES', 3),
+        'retry_sleep_ms' => (int) env('RISK4SEA_RETRY_SLEEP_MS', 300),
     ],
 
 ];
