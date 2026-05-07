@@ -195,6 +195,10 @@ The web UI is available at:
 /
 ```
 
+Screenshot:
+
+![Ports UI](public/ports.png)
+
 Filters:
 
 - `search` by port name
