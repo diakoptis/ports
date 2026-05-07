@@ -43,7 +43,7 @@ class Risk4SeaClient
 
         return array_values(array_map(
             fn (array $port): array => $this->normalizePort($port),
-            array_filter($ports, is_array(...)),
+            array_filter($ports, fn (mixed $port): bool => is_array($port)),
         ));
     }
 
