@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'risk4sea' => [
+        'base_url' => env('RISK4SEA_BASE_URL', 'https://lab.risk4sea.com'),
+        'ports_path' => env('RISK4SEA_PORTS_PATH', '/api/v1/port-calls/ports'),
+        'token' => env('RISK4SEA_TOKEN'),
+        'timeout' => (int) env('RISK4SEA_TIMEOUT', 15),
+        'connect_timeout' => (int) env('RISK4SEA_CONNECT_TIMEOUT', 5),
+    ],
+
 ];
