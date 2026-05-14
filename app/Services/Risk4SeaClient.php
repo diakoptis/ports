@@ -6,7 +6,6 @@ use App\Exceptions\Risk4SeaException;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Throwable;
@@ -14,14 +13,9 @@ use Throwable;
 class Risk4SeaClient
 {
     /**
-     * Retrieve and normalize ports from the Risk4Sea API.
+     * Retrieve raw ports from the Risk4Sea API.
      *
-     * @return list<array{
-     *     unlocode: string,
-     *     name: string,
-     *     country_name: string,
-     *     country_code: string
-     * }>
+     * @return list<array<string, mixed>>
      */
     public function listPorts(?string $search = null): array
     {
@@ -79,10 +73,13 @@ class Risk4SeaClient
             throw Risk4SeaException::unexpectedPayload();
         }
 
-        return array_values(array_map(
-            fn (array $port): array => $this->normalizePort($port),
-            array_filter($ports, fn (mixed $port): bool => is_array($port)),
+        /** @var list<array<string, mixed>> $normalizedPorts */
+        $normalizedPorts = array_values(array_filter(
+            $ports,
+            fn (mixed $port): bool => is_array($port),
         ));
+
+        return $normalizedPorts;
     }
 
     /**
@@ -135,24 +132,5 @@ class Risk4SeaClient
         }
 
         return false;
-    }
-
-    /**
-     * @param  array<string, mixed>  $port
-     * @return array{
-     *     unlocode: string,
-     *     name: string,
-     *     country_name: string,
-     *     country_code: string
-     * }
-     */
-    protected function normalizePort(array $port): array
-    {
-        return [
-            'unlocode' => trim((string) Arr::get($port, 'unlocode', '')),
-            'name' => trim((string) Arr::get($port, 'name', '')),
-            'country_name' => trim((string) Arr::get($port, 'country.name', '')),
-            'country_code' => trim((string) Arr::get($port, 'country.code', '')),
-        ];
     }
 }
