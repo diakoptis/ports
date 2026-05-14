@@ -3,7 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\Port;
-use Illuminate\Support\Carbon;
+use Carbon\CarbonInterface;
 use Illuminate\Support\Collection;
 
 class PortRepository
@@ -32,7 +32,7 @@ class PortRepository
      *     country_code: string
      * }>  $ports
      */
-    public function upsert(Collection $ports, Carbon $timestamp): void
+    public function upsert(Collection $ports, CarbonInterface $timestamp): void
     {
         Port::query()->upsert(
             $ports
